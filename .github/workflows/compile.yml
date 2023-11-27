@@ -41,12 +41,6 @@ jobs:
         run: svn export http://svn.apache.org/repos/asf/xerces/java/branches/xml-schema-1.1-dev /tmp/build-xerces
       -
         name: Compile Xerces-J
-        env:
-          # Fix the following error:
-          # [xjavac] /tmp/build-xerces/build/src/org/apache/xerces/impl/xs/models/XS11CMRestriction.java:493: error: unmappable character for encoding ASCII
-          # [xjavac]         // 4.5 S's declared {type definition} is ??validly substitutable as
-          # [xjavac]                                                  ^
-          LC_ALL: C.UTF-8
         run: cd /tmp/build-xerces && ./build.sh jars-schema11
       -
         name: List built assets
