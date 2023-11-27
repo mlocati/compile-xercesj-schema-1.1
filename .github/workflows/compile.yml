@@ -1,0 +1,47 @@
+name: Compile Xerces-J - schema1.1 Variant
+
+on: workflow_dispatch
+
+env:
+  # An URL where the JDK to be used can be freely downloaded from
+  JDK_SRC: https://repo.huaweicloud.com/java/jdk/7u80-b15/jdk-7u80-linux-x64.tar.gz
+  # The SHA-2 of the JDK tarball
+  JDK_SHA256: bad9a731639655118740bee119139c1ed019737ec802a630dd7ad7aab4309623
+
+jobs:
+  compile:
+    name: Compile
+    runs-on: ubuntu-latest
+    container: debian:bookworm
+    steps:
+      -
+        name: Update system packages
+        run: apt-get update -q && apt-get upgrade -qy
+      -
+        name: Install required system packages
+        run: apt-get install -qy subversion curl ca-certificates
+      -
+        name: Download JDK
+        run: curl -Lf -o /tmp/jdk.tgz "$JDK_SRC"
+      -
+        name: Check downloaded JDK
+        run: echo "$JDK_SHA256 /tmp/jdk.tgz" | sha256sum --check
+      -
+        name: Install JDK
+        run: |
+          mkdir -p /usr/lib/jdk
+          tar xzf /tmp/jdk.tgz  --strip-components=1 -C /usr/lib/jdk
+          echo 'JAVA_HOME=/usr/lib/jdk' >> "$GITHUB_ENV"
+          echo '/usr/lib/jdk/bin' >> "$GITHUB_PATH"
+      -
+        name: Check JDK version
+        run: java -version
+      -
+        name: Download Xerces-J
+        run: svn export http://svn.apache.org/repos/asf/xerces/java/branches/xml-schema-1.1-dev /tmp/build-xerces
+      -
+        name: Compile Xerces-J
+        run: cd /tmp/build-xerces && ./build.sh jars-schema11
+      -
+        name: List built assets
+        run: ls -l /tmp/build-xerces/build
